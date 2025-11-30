@@ -5,7 +5,7 @@
 
 
         <v-text-field v-model="search" v-if="searchEnabled" placeholder="Search" prepend-inner-icon="mdi-magnify"
-            variant="outlined" hide-details density="comfortable" class="search-box"  />
+            variant="outlined" hide-details density="comfortable" class="search-box" />
 
         <v-treeview v-model:selected="selected" :indent-lines="indentLines" :items="items" :select-strategy="strategy"
             :item-value="itemValue" :selectable="selectable" :open-all="openAll" :search="search" />
@@ -43,6 +43,7 @@ export default {
             searchEnabled: true,
             selected: [],
             items: [],
+
             vuetifyStyles: [
                 { label: 'Responsive Displays', url: 'https://vuetifyjs.com/en/styles/display/#display' },
                 { label: 'Flex', url: 'https://vuetifyjs.com/en/styles/flex/' },
@@ -56,15 +57,21 @@ export default {
         // watch for any changes of "count"
         selected: function () {
 
-            if (this.selected != undefined) {
+        
 
-                
-                if (this.selected.length > 0) {
+                var objSelected = this.findByIds(this.items, this.selected, this.getProperty('itemValue'))
 
-                    var payload = this.findByIds(this.items, this.selected , this.getProperty('itemValue'))
-                    this.send({ payload: payload })
+                var payload = {
+                    items: this.items,
+                    selected: this.selected,
+                    objSelected: objSelected
                 }
-            }
+
+                this.send({ payload: payload })
+
+
+
+            
 
         }
 
@@ -98,7 +105,7 @@ export default {
             })
         })
 
-        
+
 
 
 
@@ -182,10 +189,7 @@ export default {
                 this.selected = payload?.selected
             }
 
-            this.$store.commit('data/bind', {
-                widgetId: this.id,
-                msg
-            })
+         
         },
         /*
             (optional) Custom onLoad function to handle the loading state of the widget
@@ -195,10 +199,12 @@ export default {
         onLoad(msg, state) {
             // loads the last msg received into this node from the Node-RED datastore
             // state is auto-stored into the widget props, but is available here if you want to do anything else
-
+            console.log(msg)
 
             this.selected = msg?.payload.selected
             this.items = msg?.payload.items
+
+
 
         },
         /*
@@ -254,14 +260,7 @@ export default {
 
 
 
-
-        setselected(selected) {
-            if (selected != undefined && selected != null) {
-                this.selected = selected
-            }
-        },
-
-        findByIds(tree, ids , itemValue) {
+        findByIds(tree, ids, itemValue) {
             const result = [];
 
             function search(node) {
@@ -276,7 +275,7 @@ export default {
             tree.forEach(root => search(root));
             return result;
         },
-   
+
     }
 }
 </script>
