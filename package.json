@@ -22,7 +22,8 @@
     "files": [
         "nodes/*",
         "ui/*",
-        "resources/*"
+        "resources/*",
+        "examples/*"
     ],
     "scripts": {
         "build": "vite build",
