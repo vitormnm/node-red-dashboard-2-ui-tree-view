@@ -67,6 +67,7 @@ export default {
                     objSelected: objSelected
                 }
 
+                
                 this.send({ payload: payload })
 
 
@@ -199,7 +200,7 @@ export default {
         onLoad(msg, state) {
             // loads the last msg received into this node from the Node-RED datastore
             // state is auto-stored into the widget props, but is available here if you want to do anything else
-            console.log(msg)
+
 
             this.selected = msg?.payload.selected
             this.items = msg?.payload.items
