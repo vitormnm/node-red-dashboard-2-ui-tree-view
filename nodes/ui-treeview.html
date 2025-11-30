@@ -1,0 +1,136 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ui-treeview', {
+        category: RED._('@flowfuse/node-red-dashboard/ui-base:ui-base.label.category'),
+        color: RED._('@flowfuse/node-red-dashboard/ui-base:ui-base.colors.light'),
+        defaults: {
+            name: { value: "" },
+            group: { type: 'ui-group', required: true },
+            order: { value: 0 },
+            itemValue: { value: "id" },
+            indentLines: { value: "default" },
+            strategy: { value: "leaf" },  //['leaf', 'single-leaf', 'independent', 'single-independent', 'classic']
+            openAll: { value: true },
+            selectable: { value: true },
+            searchEnabled: { value: true },
+            width: {
+                value: 0,
+                validate: function (v) {
+                    const width = v || 0
+                    const currentGroup = $('#node-input-group').val() || this.group
+                    const groupNode = RED.nodes.node(currentGroup)
+                    const valid = !groupNode || +width <= +groupNode.width
+                    $('#node-input-size').toggleClass('input-error', !valid)
+                    return valid
+                }
+            },
+            height: { value: 0 }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "sort.svg",
+        label: function () {
+            return this.name || "ui-treeview";
+        },
+        oneditprepare: function () {
+            $('#node-input-size').elementSizer({
+                width: '#node-input-width',
+                height: '#node-input-height',
+                group: '#node-input-group'
+            });
+
+
+            $("#node-input-indentLines").typedInput({
+                types: [
+                    {
+                        value: "default",
+                        options: [
+                            { value: "default", label: "default" },
+                            { value: "simple", label: "simple" },
+                            { value: 'false', label: "none" }
+                        ]
+                    }
+                ]
+            })
+
+
+            $("#node-input-strategy").typedInput({
+                types: [
+                    {
+                        value: "leaf",
+                        options: [
+                            { value: "leaf", label: "leaf" },
+                            { value: "single-leaf", label: "simsingle-leafple" },
+                            { value: "independent", label: "independent" },
+                            { value: "single-independent", label: "single-independent" },
+                            { value: "classic", label: "classic" },
+                        ]
+                    }
+                ]
+            })
+
+            $("#node-input-openAll").typedInput({
+                type: "bool",
+                types: ["bool"],
+                typeField: "#node-input-openAll-type"
+            })
+
+            $("#node-input-selectable").typedInput({
+                type: "bool",
+                types: ["bool"],
+                typeField: "#node-input-openAll-type"
+            })
+
+            $("#node-input-searchEnabled").typedInput({
+                type: "bool",
+                types: ["bool"],
+                typeField: "#node-input-searchEnabled-type"
+            })
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="ui-treeview">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+        <input type="text" id="node-input-group">
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> <span data-i18n="ui-example.label.size"></label>
+        <input type="hidden" id="node-input-width">
+        <input type="hidden" id="node-input-height">
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> item value</label>
+        <input type="text" id="node-input-itemValue" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-indentLines"><i class="fa fa-list-alt"></i> Indent lines</label>
+        <input type="text" id="node-input-indentLines">
+    </div>
+    <div class="form-row">
+        <label for="node-input-strategy"><i class="fa fa-crosshairs"></i> Select strategy</label>
+        <input style="margin-bottom: 20px;"  type="text" id="node-input-strategy">
+    </div>
+    <div class="form-row">
+         <label for="node-input-openAll"><i class="fa fa-list-alt"></i> Open all</label>
+        <input type="text" id="node-input-openAll">
+        <input type="hidden" id="node-input-openAll-type">
+    </div>
+    <div class="form-row">
+         <label for="node-input-selectable"><i class="fa fa-mouse-pointer"></i> Selectable</label>
+        <input type="text" id="node-input-selectable">
+        <input type="hidden" id="node-input-selectable-type">
+    </div>
+    <div class="form-row">
+         <label for="node-input-searchEnabled"><i class="fa fa-search"></i> Search</label>
+        <input type="text" id="node-input-searchEnabled">
+        <input type="hidden" id="node-input-searchEnabled-type">
+    </div>   
+
+    
+</script>
