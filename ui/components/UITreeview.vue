@@ -89,17 +89,16 @@ export default {
 
         })
 
-        // this.$socket.on('msg-input:' + this.id, (msg) => {
+        this.$socket.on('msg-input:' + this.id, (msg) => {
 
-        //     // store the latest message in our client-side vuex store when we receive a new message
-        //     this.$store.commit('data/bind', {
-        //         widgetId: this.id,
-        //         msg
-        //     })
-        // })
+            // store the latest message in our client-side vuex store when we receive a new message
+            this.$store.commit('data/bind', {
+                widgetId: this.id,
+                msg
+            })
+        })
 
-        // // tell Node-RED that we're loading a new instance of this widget
-        // // this.$socket.emit('widget-load', this.id)
+        
 
 
 
@@ -277,16 +276,7 @@ export default {
             tree.forEach(root => search(root));
             return result;
         },
-        /*
-            You can also emit custom events to Node-RED, which can be handled by a custom event handler
-            See the ui-example.js file for how to subscribe to these.
-        */
-        // test() {
-        //     console.info('custom event handler:')
-        //     this.$socket.emit('my-custom-event', this.id, {
-        //         payload: 'Custom Event'
-        //     })
-        // }
+   
     }
 }
 </script>
