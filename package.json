@@ -1,6 +1,6 @@
 {
     "name": "@vitormnm/node-red-dashboard-2-ui-treeview",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Treeview Node-RED Dashboard 2.0",
     "keywords": [
         "node-red",
