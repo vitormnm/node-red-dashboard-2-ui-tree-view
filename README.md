@@ -2,6 +2,8 @@
 Treeview node-red dashboard 2
 based on api https://vuetifyjs.com/en/components/treeview/
 
+![node-red-si](/resources/treeview.PNG) 
+
 ![node-red-si](/resources/treeview.gif) 
 
 example payload and ui_update
