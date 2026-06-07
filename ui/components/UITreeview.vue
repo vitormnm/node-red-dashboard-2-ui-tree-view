@@ -1,316 +1,263 @@
 <template>
-
-
     <div class="treeview-scroll-container">
-
 
         <v-text-field v-model="search" v-if="searchEnabled" placeholder="Search" prepend-inner-icon="mdi-magnify"
             variant="outlined" hide-details density="comfortable" class="search-box" />
 
         <v-treeview v-model:selected="selected" :indent-lines="indentLines" :items="items" :select-strategy="strategy"
-            :item-value="itemValue" :selectable="selectable" :open-all="openAll" :search="search" />
+            :item-value="itemValue" :selectable="selectable" :open-all="openAll" :search="search"
+            :item-disabled="'disabled'">
+
+            <template #prepend="slotProps">
+                <v-icon
+                    v-if="getIcon(slotProps)"
+                    :color="getColor(slotProps)"
+                    :size="getIconSize(slotProps)">
+                    {{ getIcon(slotProps) }}
+                </v-icon>
+            </template>
+
+            <template #label="slotProps">
+                <span
+                    :style="getLabelStyle(slotProps)"
+                    :class="getLabelClass(slotProps)">
+                    {{ getRaw(slotProps, 'title') }}
+                </span>
+                <div v-if="getRaw(slotProps, 'subtitle')" class="treeview-subtitle">
+                    {{ getRaw(slotProps, 'subtitle') }}
+                </div>
+            </template>
+
+            <template #append="slotProps">
+                <v-chip
+                    v-if="getRaw(slotProps, 'badge') !== undefined && getRaw(slotProps, 'badge') !== null"
+                    size="x-small"
+                    :color="getRaw(slotProps, 'badgeColor') || 'primary'"
+                    class="treeview-badge">
+                    {{ getRaw(slotProps, 'badge') }}
+                </v-chip>
+                <v-icon
+                    v-if="getRaw(slotProps, 'statusIcon')"
+                    :color="getRaw(slotProps, 'statusColor') || 'grey'"
+                    size="16"
+                    class="treeview-status-icon">
+                    {{ getRaw(slotProps, 'statusIcon') }}
+                </v-icon>
+            </template>
+
+        </v-treeview>
+
     </div>
 </template>
 
 <script>
-//return-object
 import { mapState } from 'vuex'
-
 
 export default {
     name: 'UIExample',
     inject: ['$socket', '$dataTracker'],
     props: {
-        /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
         id: { type: String, required: true },
         props: { type: Object, default: () => ({}) },
         state: { type: Object, default: () => ({ enabled: false, visible: false }) }
     },
-    setup(props) {
-
-    },
-    data() {
+    setup (props) {},
+    data () {
         return {
             msg: null,
-            input: {
-                title: 'some text here will base turned into title case.'
-            },
             openAll: false,
-            indentLines: null, //simple , none , default
-            strategy: false, //['leaf', 'single-leaf', 'independent', 'single-independent', 'classic']
+            indentLines: null,
+            strategy: false,
             selectable: true,
             search: null,
             searchEnabled: true,
             selected: [],
-            items: [],
-
-            vuetifyStyles: [
-                { label: 'Responsive Displays', url: 'https://vuetifyjs.com/en/styles/display/#display' },
-                { label: 'Flex', url: 'https://vuetifyjs.com/en/styles/flex/' },
-                { label: 'Spacing', url: 'https://vuetifyjs.com/en/styles/spacing/#how-it-works' },
-                { label: 'Text & Typography', url: 'https://vuetifyjs.com/en/styles/text-and-typography/#typography' }
-            ]
+            items: []
         }
     },
 
     watch: {
-        // watch for any changes of "count"
-        selected: function () {
-
-        
-
-                var objSelected = this.findByIds(this.items, this.selected, this.getProperty('itemValue'))
-
-                var payload = {
-                    items: this.items,
-                    selected: this.selected,
-                    objSelected: objSelected
-                }
-
-                
-                this.send({ payload: payload })
-
-
-
-            
-
-        }
-
-
-
-
-
-    },
-
-    mounted() {
-        // code here when the component is first loaded
-        this.$socket.on('widget-load:' + this.id, (msg) => {
-
-
-            // load the latest message from the Node-RED datastore when this widget is loaded
-            // storing it in our vuex store so that we have it saved as we navigate around
-            this.$store.commit('data/bind', {
-                widgetId: this.id,
-                msg
-            })
-
-
-        })
-
-        this.$socket.on('msg-input:' + this.id, (msg) => {
-
-            // store the latest message in our client-side vuex store when we receive a new message
-            this.$store.commit('data/bind', {
-                widgetId: this.id,
-                msg
-            })
-        })
-
-
-
-
-
-    },
-
-    computed: {
-
-        ...mapState('data', ['messages']),
-
-
-        indentLines() {
-
-            if (this.getProperty('indentLines') === 'false') {
-                return false
-            }
-
-            return this.getProperty('indentLines')
-        },
-
-        strategy() {
-            return this.getProperty('strategy')
-        },
-
-
-        openAll() {
-            return JSON.parse(this.getProperty('openAll'));
-        },
-
-        selectable() {
-            return JSON.parse(this.getProperty('selectable'));
-        },
-        searchEnabled() {
-            return JSON.parse(this.getProperty('searchEnabled'));
-        },
-
-
-        itemValue() {
-
-            return this.getProperty('itemValue')
-        }
-
-
-
-
-    },
-    created() {
-        // setup our event handlers, and informs Node-RED that this widget has loaded
-        this.$dataTracker(this.id, this.onInput, this.onLoad, this.onDynamicProperties)
-
-
-
-
-
-    },
-    methods: {
-        /*
-            widget-action just sends a msg to Node-RED, it does not store the msg state server-side
-            alternatively, you can use widget-change, which will also store the msg in the Node's datastore
-        */
-        send(msg) {
-
-            this.$socket.emit('widget-change', this.id, msg)
-        },
-        /*
-            (optional) UIExample setup with:  onInput function to handle incoming messages from Node-RED
-        */
-        onInput(msg) {
-            // load the latest message from the Node-RED datastore when this widget is loaded
-            // storing it in our vuex store so that we have it saved as we navigate around
-
-
-            const payload = msg.payload
-
-            if (payload.items != undefined) {
-
-                this.items = payload?.items
-            }
-
-            if (payload.selected != undefined) {
-
-                this.selected = payload?.selected
-            }
-
-         
-        },
-        /*
-            (optional) Custom onLoad function to handle the loading state of the widget
-            msg   - the latest message from the Node-RED datastore
-            state - The Node-RED config, including any overrides saved to the server-side statestore
-        */
-        onLoad(msg, state) {
-            // loads the last msg received into this node from the Node-RED datastore
-            // state is auto-stored into the widget props, but is available here if you want to do anything else
-
-
-            this.selected = msg?.payload.selected
-            this.items = msg?.payload.items
-
-
-
-        },
-        /*
-            (optional) Custom onDynamicProperties function to handle dynamic properties
-            msg - the latest message from the Node-RED datastore
-        */
-
-
-        onDynamicProperties(msg) {
-
-            const updates = msg.ui_update
-
-
-            if (!updates) {
+        selected: function (newVal) {
+            if (!Array.isArray(newVal)) return
+            if (!Array.isArray(this.items) || this.items.length === 0) return
+
+            // Workaround bug Vuetify 3: item-disabled nao bloqueia selecao
+            const disabledIds = this.getDisabledIds(this.items)
+            const filtered = newVal.filter(id => !disabledIds.includes(id))
+
+            // Se clicou em item disabled, reverte silenciosamente sem enviar
+            if (filtered.length !== newVal.length) {
+                this.$nextTick(() => { this.selected = filtered })
                 return
             }
 
+            const itemVal = this.getProperty('itemValue')
+            const objSelected = this.findByIds(this.items, filtered, itemVal)
 
+            this.send({
+                payload: {
+                    items: this.items,
+                    selected: filtered,
+                    objSelected: objSelected
+                }
+            })
+        }
+    },
 
-            if (typeof updates.indentLines !== 'undefined') {
-                // save the "example" property in the Node-RED statestore
-                this.updateDynamicProperty('indentLines', updates.indentLines)
-            }
+    mounted () {
+        this.$socket.on('widget-load:' + this.id, (msg) => {
+            this.$store.commit('data/bind', { widgetId: this.id, msg })
+        })
+        this.$socket.on('msg-input:' + this.id, (msg) => {
+            this.$store.commit('data/bind', { widgetId: this.id, msg })
+        })
+    },
 
-            if (typeof updates.strategy !== 'undefined') {
-                // save the "example" property in the Node-RED statestore
-                this.updateDynamicProperty('strategy', updates.strategy)
-            }
+    computed: {
+        ...mapState('data', ['messages']),
 
-            if (typeof updates.openAll !== 'undefined') {
-                // save the "example" property in the Node-RED statestore
-                this.updateDynamicProperty('openAll', updates.openAll)
-            }
+        indentLines () {
+            if (this.getProperty('indentLines') === 'false') return false
+            return this.getProperty('indentLines')
+        },
+        strategy () { return this.getProperty('strategy') },
+        openAll () { return JSON.parse(this.getProperty('openAll')) },
+        selectable () { return JSON.parse(this.getProperty('selectable')) },
+        searchEnabled () { return JSON.parse(this.getProperty('searchEnabled')) },
+        itemValue () { return this.getProperty('itemValue') }
+    },
 
-            if (typeof updates.selectable !== 'undefined') {
-                // save the "example" property in the Node-RED statestore
-                this.updateDynamicProperty('selectable', updates.selectable)
-            }
+    created () {
+        this.$dataTracker(this.id, this.onInput, this.onLoad, this.onDynamicProperties)
+    },
 
-            if (typeof updates.searchEnabled !== 'undefined') {
-                // save the "example" property in the Node-RED statestore
-                this.updateDynamicProperty('searchEnabled', updates.searchEnabled)
-            }
-
-            if (typeof updates.itemValue !== 'undefined') {
-                // save the "example" property in the Node-RED statestore
-                this.updateDynamicProperty('searchEnabled', updates.itemValue)
-            }
-
-
-
+    methods: {
+        send (msg) {
+            this.$socket.emit('widget-change', this.id, msg)
         },
 
-
-
-        findByIds(tree, ids, itemValue) {
-            const result = [];
-
-            function search(node) {
-                if (ids.includes(node[itemValue])) {
-                    result.push(node);
-                }
-                if (node.children) {
-                    node.children.forEach(child => search(child));
-                }
-            }
-
-            tree.forEach(root => search(root));
-            return result;
+        // Extrai o objeto raw do slot, compativel com Vuetify 3
+        getRaw (slotProps, key) {
+            if (!slotProps) return null
+            const raw = slotProps.item?.raw ?? slotProps.item ?? {}
+            return key ? raw[key] : raw
         },
 
+        getIcon (slotProps) {
+            const raw = this.getRaw(slotProps)
+            if (!raw) return null
+            return raw.icon || null
+        },
+
+        getColor (slotProps) {
+            const raw = this.getRaw(slotProps)
+            if (!raw) return undefined
+            return raw.iconColor || raw.color || undefined
+        },
+
+        getIconSize (slotProps) {
+            const raw = this.getRaw(slotProps)
+            if (!raw) return 'default'
+            return raw.iconSize || 'default'
+        },
+
+        getLabelStyle (slotProps) {
+            const raw = this.getRaw(slotProps)
+            if (!raw || !raw.color) return {}
+            return { color: raw.color }
+        },
+
+        getLabelClass (slotProps) {
+            const raw = this.getRaw(slotProps)
+            if (!raw) return ''
+            return raw.labelClass || ''
+        },
+
+        // Retorna todos os IDs de itens com disabled: true (recursivo)
+        getDisabledIds (tree) {
+            const result = []
+            if (!Array.isArray(tree)) return result
+            const itemVal = this.getProperty('itemValue') || 'id'
+            function walk (node) {
+                if (!node) return
+                if (node.disabled === true) result.push(node[itemVal])
+                if (Array.isArray(node.children)) node.children.forEach(child => walk(child))
+            }
+            tree.forEach(root => walk(root))
+            return result
+        },
+
+        onInput (msg) {
+            if (!msg || !msg.payload) return
+            const payload = msg.payload
+            if (payload.items !== undefined) this.items = payload.items
+            if (payload.selected !== undefined) this.selected = payload.selected
+        },
+
+        onLoad (msg, state) {
+            if (!msg || !msg.payload) return
+            this.selected = msg.payload.selected || []
+            this.items = msg.payload.items || []
+        },
+
+        onDynamicProperties (msg) {
+            const updates = msg.ui_update
+            if (!updates) return
+            if (typeof updates.indentLines !== 'undefined') this.updateDynamicProperty('indentLines', updates.indentLines)
+            if (typeof updates.strategy !== 'undefined') this.updateDynamicProperty('strategy', updates.strategy)
+            if (typeof updates.openAll !== 'undefined') this.updateDynamicProperty('openAll', updates.openAll)
+            if (typeof updates.selectable !== 'undefined') this.updateDynamicProperty('selectable', updates.selectable)
+            if (typeof updates.searchEnabled !== 'undefined') this.updateDynamicProperty('searchEnabled', updates.searchEnabled)
+            if (typeof updates.itemValue !== 'undefined') this.updateDynamicProperty('itemValue', updates.itemValue)
+        },
+
+        findByIds (tree, ids, itemValue) {
+            const result = []
+            if (!Array.isArray(tree) || !Array.isArray(ids) || !itemValue) return result
+            function search (node) {
+                if (!node) return
+                if (ids.includes(node[itemValue])) result.push(node)
+                if (Array.isArray(node.children)) node.children.forEach(child => search(child))
+            }
+            tree.forEach(root => search(root))
+            return result
+        }
     }
 }
 </script>
 
 <style scoped>
-/* CSS is auto scoped, but using named classes is still recommended */
 @import "../stylesheets/ui-treeview.css";
 
-/* 1. Configuração do Container para permitir Scroll */
 .treeview-scroll-container {
     width: 100%;
-    /* Ocupa a largura disponível */
     overflow-x: auto;
-    /* Habilita o scroll lateral se necessário */
     white-space: nowrap;
-    /* Impede que o conteúdo quebre linha */
 }
 
-/* 2. Sobrescrevendo o estilo do Vuetify que cria os "..." */
-/* O :deep() é necessário se estiver usando scoped styles */
 .treeview-scroll-container :deep(.v-list-item-title) {
     text-overflow: unset !important;
-    /* Remove o "..." */
     overflow: visible !important;
-    /* Permite que o texto exceda o container */
     white-space: nowrap !important;
-    /* Mantém em uma linha */
 }
 
-/* Opcional: Ajuste a largura do item para não ficar preso a 100% do pai */
 .treeview-scroll-container :deep(.v-list-item) {
     width: max-content;
-    /* O item cresce o quanto o texto precisar */
     min-width: 100%;
-    /* Mas nunca fica menor que a tela */
+}
+
+.treeview-subtitle {
+    font-size: 11px;
+    opacity: 0.6;
+    line-height: 1.3;
+    white-space: normal;
+}
+
+.treeview-badge {
+    margin-left: 6px;
+}
+
+.treeview-status-icon {
+    margin-left: 4px;
 }
 </style>
