@@ -6,7 +6,13 @@ based on api https://vuetifyjs.com/en/components/treeview/
 
 ![node-red-si](/resources/treeview.gif) 
 
-example payload and ui_update
+
+### Support the development of this project and others if you found it useful.
+<a href="https://buymeacoffee.com/vitormnm">
+    <img src="./resources/bmc-button.svg" alt="Logo" width="200">
+</a>
+
+# example payload and ui_update
 
 ```
 msg.payload = {
